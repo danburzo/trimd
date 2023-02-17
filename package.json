@@ -1,0 +1,28 @@
+{
+	"name": "trimd",
+	"version": "0.0.1",
+	"description": "Trim HTML to Markdown",
+	"main": "index.js",
+	"scripts": {
+		"prepare": "git config core.hooksPath .git-hooks",
+		"test": "npx tape 'test/**/*.test.js'"
+	},
+	"type": "module",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/danburzo/trimd.git"
+	},
+	"author": "",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/danburzo/trimd/issues"
+	},
+	"homepage": "https://github.com/danburzo/trimd#readme",
+	"devDependencies": {
+		"prettier": "^2.8.4",
+		"pretty-quick": "^3.1.3"
+	},
+	"dependencies": {
+		"opsh": "^1.1.0"
+	}
+}
