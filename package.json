@@ -2,7 +2,10 @@
 	"name": "trimd",
 	"version": "0.0.1",
 	"description": "Trim HTML to Markdown",
-	"main": "index.js",
+	"main": "src/index.js",
+	"bin": {
+		"trimd": "src/cli.js"
+	},
 	"scripts": {
 		"prepare": "git config core.hooksPath .git-hooks",
 		"test": "npx tape 'test/**/*.test.js'"
@@ -23,6 +26,13 @@
 		"pretty-quick": "^3.1.3"
 	},
 	"dependencies": {
-		"opsh": "^1.1.0"
+		"opsh": "^1.1.0",
+		"rehype-parse": "^8.0.4",
+		"rehype-remark": "^9.1.2",
+		"rehype-stringify": "^9.0.3",
+		"remark-parse": "^10.0.1",
+		"remark-rehype": "^10.1.0",
+		"remark-stringify": "^10.0.2",
+		"unified": "^10.1.2"
 	}
 }
