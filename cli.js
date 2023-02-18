@@ -10,6 +10,7 @@ import rehypeStringify from 'rehype-stringify';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import remarkStringify from 'remark-stringify';
+import remarkGfm from 'remark-gfm';
 
 async function getPackage() {
 	return JSON.parse(
@@ -32,12 +33,14 @@ function getHtmlToMdProcessor(opts = {}) {
 		.use(rehypeParse)
 		.use(rehypeSanitize)
 		.use(rehypeRemark)
+		.use(remarkGfm)
 		.use(remarkStringify, opts);
 }
 
 function getMdToHtmlProcessor(opts) {
 	return unified()
 		.use(remarkParse)
+		.use(remarkGfm)
 		.use(remarkRehype)
 		.use(rehypeSanitize)
 		.use(rehypeStringify);

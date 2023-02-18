@@ -12,7 +12,7 @@
 	"scripts": {
 		"prepare": "git config core.hooksPath .git-hooks",
 		"test": "npx tape 'test/**/*.test.js'",
-		"build": "npx esbuild --outdir=build --metafile=build/meta.json --bundle --minify --format=esm src/index.js"
+		"build": "npx esbuild --outdir=www/build --metafile=www/build/meta.json --bundle --minify --format=esm www/index.js"
 	},
 	"type": "module",
 	"repository": {
@@ -37,6 +37,7 @@
 		"rehype-remark": "^9.1.2",
 		"rehype-sanitize": "^5.0.1",
 		"rehype-stringify": "^9.0.3",
+		"remark-gfm": "^3.0.1",
 		"remark-parse": "^10.0.1",
 		"remark-rehype": "^10.1.0",
 		"remark-stringify": "^10.0.2",
