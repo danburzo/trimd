@@ -10,7 +10,22 @@ import rehypeStringify from 'rehype-stringify';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import remarkStringify from 'remark-stringify';
-import slurp from './util/slurp.js';
+
+async function getPackage() {
+	return JSON.parse(
+		await readFile(new URL('./package.json', import.meta.url))
+	);
+}
+
+async function slurp(stream) {
+	let arr = [],
+		len = 0;
+	for await (let chunk of stream) {
+		arr.push(chunk);
+		len += chunk.length;
+	}
+	return Buffer.concat(arr, len).toString();
+}
 
 function getHtmlToMdProcessor(opts = {}) {
 	return unified()
@@ -104,12 +119,6 @@ console.log(
 			)
 	)
 );
-
-async function getPackage() {
-	return JSON.parse(
-		await readFile(new URL('../package.json', import.meta.url))
-	);
-}
 
 async function outputHelp() {
 	const pkg = await getPackage();

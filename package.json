@@ -2,9 +2,12 @@
 	"name": "trimd",
 	"version": "0.0.1",
 	"description": "Trim HTML to Markdown from the command line.",
-	"main": "src/index.js",
+	"main": "cli.js",
+	"files": [
+		"cli.js"
+	],
 	"bin": {
-		"trimd": "src/cli.js"
+		"trimd": "cli.js"
 	},
 	"scripts": {
 		"prepare": "git config core.hooksPath .git-hooks",
