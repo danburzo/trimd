@@ -10,10 +10,10 @@ Install `trimd` globally using `npm`:
 npm install -g trimd
 ```
 
-Or run `trimd` without installing it using `npx`:
+Or run `trimd` on the fly using `npx`:
 
 ```bash
-npx trimd
+npx trimd markdown my-file.html
 ```
 
 ## Usage
@@ -31,7 +31,11 @@ Convert HTML to Markdown.
 trimd markdown my-file.html
 ```
 
-You can pass your own preferences for generating Markdown with options in the form `--md.<option>=value`, which will get forwarded to [`remark-stringify`](https://github.com/remarkjs/remark/tree/main/packages/remark-stringify).
+You can pass your own preferences for generating Markdown with options in the form **`--md.<option>=<value>`**, which will get forwarded to [`remark-stringify`](https://github.com/remarkjs/remark/tree/main/packages/remark-stringify):
+
+```bash
+trimd markdown --md.strong='*' my-file.html
+```
 
 These are the default Markdown options:
 
@@ -51,4 +55,10 @@ Convert Markdown to HTML.
 
 ```bash
 trimd markup my-file.md
+```
+
+These are the default HTML options:
+
+```js
+const HTML_DEFAULTS = {};
 ```

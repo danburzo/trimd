@@ -1,11 +1,7 @@
 import { unified } from 'unified';
-import remarkParse from 'remark-parse';
-import rehypeParse from 'rehype-parse';
-import remarkRehype from 'remark-rehype';
+import rehypeDomParse from 'rehype-dom-parse';
 import rehypeRemark from 'rehype-remark';
 import remarkStringify from 'remark-stringify';
-import rehypeStringify from 'rehype-stringify';
-import rehypeSanitize from 'rehype-sanitize';
 
 const processors = new WeakMap();
 
@@ -13,8 +9,7 @@ export async function markdown(html, opts) {
 	let toMarkdown = processors.get(opts);
 	if (!toMarkdown) {
 		toMarkdown = unified()
-			.use(rehypeParse)
-			.use(rehypeSanitize)
+			.use(rehypeDomParse)
 			.use(rehypeRemark)
 			.use(remarkStringify, opts);
 		processors.set(opts, toMarkdown);
@@ -22,15 +17,55 @@ export async function markdown(html, opts) {
 	return toMarkdown.process(html).then(res => res.toString());
 }
 
-export async function markup(md, opts) {
-	let toHTML = processors.get(opts);
-	if (!toHTML) {
-		toHTML = unified()
-			.use(remarkParse)
-			.use(remarkRehype)
-			.use(rehypeSanitize)
-			.use(rehypeStringify);
-		processors.set(opts, toHTML);
+/*
+	For the given `form` element, 
+	with an optional `submitter` element,
+	return an object whose keys 
+	are the names of the form elements, 
+	mapping to their corresponding values 
+	based on the type of each element.
+ */
+export function formDataMap(form, submitter) {
+	const excludedTags = ['FIELDSET', 'OBJECT', 'OUTPUT'];
+	const excludedTypes = ['button', 'reset', 'image'];
+
+	function shouldSubmit(el) {
+		if (!el.name) return false;
+		if (excludedTags.includes(el.tagName)) return false;
+		if (excludedTypes.includes(el.type)) return false;
+		if (el.type === 'submit' && el !== submitter) return false;
+		if (el.type === 'radio' && !el.checked) return false;
+		if (el.type === 'checkbox' && !el.checked) return false;
+		if (el.disabled || el.matches(':disabled')) return false;
+		if (el.closest('datalist')) return false;
+		return true;
 	}
-	return toHTML.process(md).then(res => res.toString());
+
+	const result = {};
+
+	function append(key, val) {
+		result[key] = Object.hasOwn(result, key)
+			? [].concat(result[key], val)
+			: val;
+	}
+
+	Array.from(form.elements).forEach(el => {
+		if (!shouldSubmit(el)) return;
+		const { name, type } = el;
+		if (type === 'number' || type === 'range') {
+			append(name, +el.value);
+		} else if (type === 'date' || type === 'datetime-local') {
+			append(name, el.valueAsDate());
+		} else if (type === 'file') {
+			append(name, el.files);
+		} else if (type === 'url') {
+			append(name, new URL(el.value));
+		} else if (type === 'select-one' || type === 'select-multiple') {
+			el.selectedOptions.forEach(option => append(name, option.value));
+		} else {
+			append(name, el.value);
+		}
+	});
+
+	return result;
 }

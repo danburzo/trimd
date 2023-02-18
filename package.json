@@ -8,7 +8,8 @@
 	},
 	"scripts": {
 		"prepare": "git config core.hooksPath .git-hooks",
-		"test": "npx tape 'test/**/*.test.js'"
+		"test": "npx tape 'test/**/*.test.js'",
+		"build": "npx esbuild --outdir=build --metafile=build/meta.json --bundle --minify --format=esm src/index.js"
 	},
 	"type": "module",
 	"repository": {
@@ -22,11 +23,13 @@
 	},
 	"homepage": "https://github.com/danburzo/trimd",
 	"devDependencies": {
+		"esbuild": "^0.17.8",
 		"prettier": "^2.8.4",
 		"pretty-quick": "^3.1.3"
 	},
 	"dependencies": {
 		"opsh": "^1.1.0",
+		"rehype-dom-parse": "^4.0.2",
 		"rehype-parse": "^8.0.4",
 		"rehype-remark": "^9.1.2",
 		"rehype-sanitize": "^5.0.1",

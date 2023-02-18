@@ -2,8 +2,31 @@
 
 import { readFile } from 'node:fs/promises';
 import opsh from 'opsh';
-import { markdown, markup } from './index.js';
+import { unified } from 'unified';
+import rehypeParse from 'rehype-parse';
+import rehypeRemark from 'rehype-remark';
+import rehypeSanitize from 'rehype-sanitize';
+import rehypeStringify from 'rehype-stringify';
+import remarkParse from 'remark-parse';
+import remarkRehype from 'remark-rehype';
+import remarkStringify from 'remark-stringify';
 import slurp from './util/slurp.js';
+
+function getHtmlToMdProcessor(opts = {}) {
+	return unified()
+		.use(rehypeParse)
+		.use(rehypeSanitize)
+		.use(rehypeRemark)
+		.use(remarkStringify, opts);
+}
+
+function getMdToHtmlProcessor(opts) {
+	return unified()
+		.use(remarkParse)
+		.use(remarkRehype)
+		.use(rehypeSanitize)
+		.use(rehypeStringify);
+}
 
 const commands = ['markdown', 'markup'];
 const args = opsh(process.argv.slice(2), ['h', 'help', 'v', 'version']);
@@ -63,25 +86,24 @@ if (!operands.length) {
 	operands.push('-');
 }
 
-const results = await Promise.all(
-	operands
-		.map(operand => {
-			if (operand === '-') {
-				return slurp(process.stdin);
-			}
-			return readFile(operand, 'utf8');
-		})
-		.map(promise =>
-			promise.then(content => {
-				if (command === 'markdown') {
-					return markdown(content, mdOptions);
-				}
-				return markup(content, htmlOptions);
-			})
-		)
-);
+const processor =
+	command === 'markdown'
+		? getMdToHtmlProcessor(mdOptions)
+		: getHtmlToMdProcessor(htmlOptions);
 
-process.stdout.write(results.join('\n'));
+console.log(
+	await Promise.all(
+		operands
+			.map(it =>
+				it === '-' ? slurp(process.stdin) : readFile(it, 'utf8')
+			)
+			.map(promise =>
+				promise
+					.then(content => processor.process(content))
+					.then(result => String(result))
+			)
+	)
+);
 
 async function getPackage() {
 	return JSON.parse(
