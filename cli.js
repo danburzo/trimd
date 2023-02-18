@@ -46,7 +46,9 @@ function getMdToHtmlProcessor(opts) {
 const commands = ['markdown', 'markup'];
 const args = opsh(process.argv.slice(2), ['h', 'help', 'v', 'version']);
 
-if (args.options.h || args.options.help) {
+const [command, ...operands] = args.operands;
+
+if (!command || args.options.h || args.options.help) {
 	await outputHelp();
 	process.exit();
 }
@@ -57,10 +59,8 @@ if (args.options.v || args.options.version) {
 	process.exit();
 }
 
-const [command, ...operands] = args.operands;
-
 if (!commands.includes(command)) {
-	throw new Error(
+	console.error(
 		`Invalid command '${command}'. Expected one of: ${commands.join(', ')}.`
 	);
 }
@@ -103,22 +103,20 @@ if (!operands.length) {
 
 const processor =
 	command === 'markdown'
-		? getMdToHtmlProcessor(mdOptions)
-		: getHtmlToMdProcessor(htmlOptions);
+		? getHtmlToMdProcessor(mdOptions)
+		: getMdToHtmlProcessor(htmlOptions);
 
-console.log(
-	await Promise.all(
-		operands
-			.map(it =>
-				it === '-' ? slurp(process.stdin) : readFile(it, 'utf8')
-			)
-			.map(promise =>
-				promise
-					.then(content => processor.process(content))
-					.then(result => String(result))
-			)
-	)
+const results = await Promise.all(
+	operands
+		.map(it => (it === '-' ? slurp(process.stdin) : readFile(it, 'utf8')))
+		.map(promise =>
+			promise
+				.then(content => processor.process(content))
+				.then(result => String(result))
+		)
 );
+
+console.log(results.join('\n'));
 
 async function outputHelp() {
 	const pkg = await getPackage();
@@ -157,5 +155,14 @@ Markdown-specific options:
 
     --md.<option>=<value>
         Markdown options forwarded to 'remark-stringify'.
+
+Examples:
+
+    Convert HTML to Markdown: 
+        trimd markdown my-file.html
+
+    Convert Markdown to HTML:
+        trimd markup README.md 
+
 `);
 }
