@@ -5,15 +5,62 @@ import opsh from 'opsh';
 import { markdown, markup } from './index.js';
 import slurp from './util/slurp.js';
 
-const commands = { markdown, markup };
-const args = opsh(process.argv.slice(2), []);
-const [command, ...operands] = args.operands;
-const fn = commands[command];
+const commands = ['markdown', 'markup'];
+const args = opsh(process.argv.slice(2), ['h', 'help', 'v', 'version']);
 
-if (!fn) {
+if (args.options.h || args.options.help) {
+	await outputHelp();
+	process.exit();
+}
+
+if (args.options.v || args.options.version) {
+	const pkg = await getPackage();
+	console.log(pkg.version);
+	process.exit();
+}
+
+const [command, ...operands] = args.operands;
+
+if (!commands.includes(command)) {
 	throw new Error(
-		`Invalid command: ${command}. Expected 'markdown' or 'markup'.`
+		`Invalid command '${command}'. Expected one of: ${commands.join(', ')}.`
 	);
+}
+
+function cast(val) {
+	if (val === 'true') return true;
+	if (val === 'false') return false;
+	const num = parseFloat(val);
+	if (!Number.isNaN(num)) return num;
+	return val;
+}
+
+function namespacedOptions(namespace) {
+	const matcher = new RegExp(String.raw`${namespace}\.(.+)`);
+	return Object.keys(args.options).reduce((obj, k) => {
+		const m = k.match(matcher);
+		if (m) {
+			obj[m[1]] = cast(args.options[k]);
+		}
+		return obj;
+	}, {});
+}
+
+const MD_DEFAULTS = {
+	fences: true,
+	emphasis: '_',
+	strong: '_',
+	resourceLink: true,
+	rule: '-'
+};
+
+const HTML_DEFAULTS = {};
+
+const mdOptions = { ...MD_DEFAULTS, ...namespacedOptions('md') };
+const htmlOptions = { ...HTML_DEFAULTS };
+
+if (!operands.length) {
+	operands.push('-');
 }
 
 const results = await Promise.all(
@@ -24,7 +71,60 @@ const results = await Promise.all(
 			}
 			return readFile(operand, 'utf8');
 		})
-		.map(promise => promise.then(content => fn(content)))
+		.map(promise =>
+			promise.then(content => {
+				if (command === 'markdown') {
+					return markdown(content, mdOptions);
+				}
+				return markup(content, htmlOptions);
+			})
+		)
 );
 
 process.stdout.write(results.join('\n'));
+
+async function getPackage() {
+	return JSON.parse(
+		await readFile(new URL('../package.json', import.meta.url))
+	);
+}
+
+async function outputHelp() {
+	const pkg = await getPackage();
+	console.log(`${pkg.name} ${pkg.version}`);
+	console.log(`${pkg.description}`);
+	console.log(`Homepage: ${pkg.homepage}`);
+
+	console.log(`
+Usage:
+  
+    trimd [markup | markdown] [options] [file, ...]
+
+    Operands are one or more files provided by file path.
+    Using '-' (dash) as an operand reads from the standard input ('stdin').
+    When no operands are provided, input is read from 'stdin'.
+
+    Output is provided to the standard output ('stdout').
+
+General options:
+
+    -h, --help
+        Output help information.
+
+    -v, --version
+        Output program version.
+
+Commands:
+
+    trimd markdown
+        Convert HTML to Markdown.
+
+    trimd markup
+        Convert Markdown to HMTL.
+
+Markdown-specific options:
+
+    --md.<option>=<value>
+        Markdown options forwarded to 'remark-stringify'.
+`);
+}
