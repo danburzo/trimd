@@ -1,6 +1,8 @@
 # trimd
 
-Trim HTML to Markdown from the command line.
+Convert HTML to Markdown from the command line.
+
+An online companion tool is available at [**danburzo.ro/trimd**](https://danburzo.ro/trimd/).
 
 ## Getting started
 

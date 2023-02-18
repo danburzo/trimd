@@ -12,7 +12,8 @@
 	"scripts": {
 		"prepare": "git config core.hooksPath .git-hooks",
 		"test": "npx tape 'test/**/*.test.js'",
-		"build": "npx esbuild --outdir=www/build --metafile=www/build/meta.json --bundle --minify --format=esm www/index.js"
+		"start:web": "npx esbuild --servedir=web --watch --outdir=web/build --metafile=web/build/meta.json --bundle --format=esm web/index.js",
+		"build:web": "npx esbuild --outdir=web/build --metafile=web/build/meta.json --bundle --minify --format=esm web/index.js"
 	},
 	"type": "module",
 	"repository": {

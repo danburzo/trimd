@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>trimd, an online HTML to Markdown converter</title>
+
+		<style type="text/css">
+			* {
+				box-sizing: border-box;
+			}
+
+			html {
+				--font-mono: Menlo, monospace;
+				--font-main: sans-serif;
+				--color-secondary: #7f6f6f;
+				--color-hl: #ffd700;
+				--color-fg: #2f2020;
+				--color-bg: #fff8f0;
+				--color-bg-darker: #f0eae3;
+				--color-accent: #0a807f;
+				--color-accent2: #7c291d;
+				--color-accent3: #266ebc;
+				--color-accent4: #c42448;
+
+				-webkit-text-size-adjust: none;
+			}
+
+			:focus {
+				outline-offset: 1px;
+			}
+
+			a {
+				color: var(--color-accent4);
+			}
+
+			pre,
+			code,
+			samp,
+			kbd {
+				font-family: var(--font-mono);
+			}
+
+			body {
+				font-family: var(--font-main);
+				background: var(--color-bg);
+				color: var(--color-fg);
+				margin: 0;
+				padding: 1rem;
+				tab-size: 2;
+				scrollbar-gutter: stable;
+			}
+
+			.columns {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+				gap: 1rem;
+			}
+
+			input,
+			button,
+			select,
+			textarea {
+				font: inherit;
+				font-size: max(16px, 1em);
+				letter-spacing: inherit;
+			}
+
+			button {
+				appearance: none;
+				padding: 0.5rem 1.5rem;
+				/*				border: 2px solid var(--color-fg);*/
+				border: none;
+				background: var(--color-accent2);
+				color: white;
+			}
+
+			textarea {
+				font-family: var(--font-mono);
+				appearance: none;
+				border: 2px solid var(--color-fg);
+				padding: 0.5rem;
+				margin: 0.5rem 0;
+				width: 100%;
+				min-height: 50vh;
+				border-radius: 0;
+			}
+
+			textarea:focus {
+				/*				outline: 3px solid var(--color-hl);*/
+				/*				box-shadow: inset 0 0 0 2px;*/
+			}
+
+			details {
+				padding: 0.5rem;
+				margin: 1rem 0;
+				background: var(--color-bg-darker);
+			}
+
+			summary {
+				font-weight: bold;
+				cursor: pointer;
+			}
+
+			h1,
+			h2 {
+				font-size: 1em;
+			}
+
+			fieldset {
+				border: none;
+				border-top: 1px solid #aaa;
+				margin: 1rem 0;
+				padding: 1rem;
+			}
+
+			fieldset legend {
+				font-weight: bold;
+			}
+
+			form label {
+				white-space: nowrap;
+				margin-right: 1rem;
+			}
+
+			:disabled {
+				background: var(--color-bg-darker);
+				color: inherit;
+			}
+			:disabled:after {
+				content: ' (not available)';
+				font-style: italic;
+			}
+		</style>
+	</head>
+	<body>
+		<header>
+			<h1>
+				<a href="https://danburzo.ro/trimd/">trimd</a>, an online HTML
+				to Markdown converter
+			</h1>
+		</header>
+
+		<div class="columns">
+			<div>
+				<h2>
+					<label for="html_input">HTML input:</label>
+				</h2>
+				<textarea id="html_input" autocomplete="off"></textarea>
+				<button type="button" id="paste_button" disabled>Paste</button>
+			</div>
+			<div>
+				<h2>
+					<label for="md_output">
+						<span class="visually-hidden">(Read-only)</span>
+						Markdown output:
+					</label>
+				</h2>
+				<textarea id="md_output" autocomplete="off"></textarea>
+				<button type="button" id="copy_button" disabled>
+					Copy to clipboard
+				</button>
+			</div>
+		</div>
+
+		<div class="columns">
+			<div>
+				<details>
+					<summary>Input options</summary>
+					<form id="input_options">
+						<p>
+							<input
+								id="option_prefer_html"
+								name="prefer_html"
+								type="checkbox"
+								checked
+							/>
+							<label for="option_prefer_html"
+								>Prefer pasting HTML data</label
+							>
+						</p>
+					</form>
+				</details>
+			</div>
+			<div>
+				<details>
+					<summary>Markdown options</summary>
+					<form id="output_options">
+						<fieldset>
+							<legend>Bullet point</legend>
+							<label>
+								<input
+									type="radio"
+									name="bullet"
+									value="*"
+									checked
+								/>
+								<code aria-hidden="true">*</code> (Star)
+							</label>
+							<label>
+								<input type="radio" name="bullet" value="+" />
+								<code aria-hidden="true">+</code> (Plus sign)
+							</label>
+							<label>
+								<input type="radio" name="bullet" value="-" />
+								<code aria-hidden="true">-</code> (Hyphen)
+							</label>
+						</fieldset>
+						<fieldset>
+							<legend>Emphasis</legend>
+							<label>
+								<input type="radio" name="emphasis" value="*" />
+								<code aria-hidden="true">*</code> (Star)
+							</label>
+							<label>
+								<input
+									type="radio"
+									name="emphasis"
+									value="_"
+									checked
+								/>
+								<code aria-hidden="true">_</code> (Underscore)
+							</label>
+						</fieldset>
+						<fieldset>
+							<legend>Strong emphasis</legend>
+							<label>
+								<input type="radio" name="strong" value="*" />
+								<code aria-hidden="true">**</code> (Stars)
+							</label>
+							<label>
+								<input
+									type="radio"
+									name="strong"
+									value="_"
+									checked
+								/>
+								<code aria-hidden="true">__</code> (Underscores)
+							</label>
+						</fieldset>
+
+						<fieldset>
+							<legend>Fences</legend>
+							<label>
+								<input type="radio" name="fence" value="~" />
+								<code aria-hidden="true">~~~</code> (Tildes)
+							</label>
+							<label>
+								<input
+									type="radio"
+									name="fence"
+									value="`"
+									checked
+								/>
+								<code aria-hidden="true">```</code> (Backticks)
+							</label>
+						</fieldset>
+
+						<fieldset>
+							<legend>Horizontal rules</legend>
+							<label>
+								<input
+									type="radio"
+									name="rule"
+									value="-"
+									checked
+								/>
+								<code aria-hidden="true">---</code> (Dashes)
+							</label>
+							<label>
+								<input type="radio" name="rule" value="*" />
+								<code aria-hidden="true">***</code> (Stars)
+							</label>
+						</fieldset>
+
+						<fieldset>
+							<legend>Headings</legend>
+							<label>
+								<input
+									type="checkbox"
+									name="setext"
+									value="true"
+								/>
+								Setext-style headings
+							</label>
+						</fieldset>
+					</form>
+				</details>
+			</div>
+		</div>
+
+		<h2>About trimd</h2>
+
+		<p>
+			Trimd is an online tool for converting HTML to Markdown. A companion
+			command-line tool is
+			<a href="https://github.com/danburzo/trimd">available on GitHub</a>.
+		</p>
+
+		<p>
+			Made by <a href="https://danburzo.ro/">Dan Cătălin Burzo</a>.
+			Powered by <a href="https://unifiedjs.com/">unified.js</a>.
+		</p>
+
+		<script type="module">
+			import { markdown, formDataMap, debounce } from './build/index.js';
+
+			const input = document.getElementById('html_input');
+			const output = document.getElementById('md_output');
+			const inputOptions = document.getElementById('input_options');
+			const outputOptions = document.getElementById('output_options');
+
+			const pasteButton = document.getElementById('paste_button');
+			const copyButton = document.getElementById('copy_button');
+
+			if (navigator.clipboard) {
+				if (navigator.clipboard.writeText) {
+					copyButton.disabled = false;
+					copyButton.addEventListener('click', e => {
+						navigator.clipboard.writeText(output.value);
+					});
+				}
+
+				if (navigator.clipboard.read) {
+					pasteButton.disabled = false;
+					pasteButton.addEventListener('click', async e => {
+						const options = formDataMap(inputOptions);
+						const clipboardItems = await navigator.clipboard.read();
+						if (options.prefer_html) {
+							const item = clipboardItems.find(it =>
+								it.types.includes('text/html')
+							);
+							if (item) {
+								input.value = await item
+									.getType('text/html')
+									.then(blob => blob.text());
+								transformText();
+								return;
+							}
+						}
+						const item = clipboardItems.find(it =>
+							it.types.includes('text/plain')
+						);
+						if (item) {
+							input.value = await item
+								.getType('text/plain')
+								.then(blob => blob.text());
+							transformText();
+						}
+					});
+				}
+			}
+
+			input.addEventListener('dragover', e => {
+				e.preventDefault();
+			});
+
+			input.addEventListener('drop', e => {
+				const options = formDataMap(inputOptions);
+				let content;
+				if (options.prefer_html) {
+					content = e.dataTransfer.getData('text/html');
+				}
+				if (!content) {
+					content = e.dataTransfer.getData('text/plain');
+				}
+				if (content) {
+					input.value = content;
+					transformText();
+				}
+				e.preventDefault();
+			});
+
+			async function transformText() {
+				const opts = formDataMap(outputOptions);
+				output.value = await markdown(input.value, opts);
+			}
+
+			/*
+				Intercept paste event to grab the 'text/html' entry
+				from the clipboard instead of the plain-text one,
+				if the user has that preference enabled.
+			*/
+			input.addEventListener('paste', function (e) {
+				const options = formDataMap(inputOptions);
+				if (options.prefer_html) {
+					const html = e.clipboardData.getData('text/html');
+					if (html) {
+						if (document.execCommand('insertText', false, html)) {
+							e.preventDefault();
+						}
+					}
+				}
+			});
+
+			/*
+				Make output textarea effectively read-only,
+				without removing the affordances of a read/write textarea.
+			*/
+			output.addEventListener('beforeinput', e => {
+				e.preventDefault();
+			});
+
+			/*
+				Perform transformation on each change.
+			*/
+			input.addEventListener('input', debounce(transformText));
+			inputOptions.addEventListener('input', transformText);
+			outputOptions.addEventListener('input', transformText);
+		</script>
+	</body>
+</html>
