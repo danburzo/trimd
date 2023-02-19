@@ -1,6 +1,6 @@
 # trimd
 
-Convert HTML to Markdown from the command line.
+Convert between HTML and Markdown from the command line, powered by [unified.js](https://unifiedjs.com).
 
 An online companion tool is available at [**danburzo.ro/trimd**](https://danburzo.ro/trimd/).
 
