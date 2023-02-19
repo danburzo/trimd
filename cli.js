@@ -68,6 +68,7 @@ if (!commands.includes(command)) {
 	console.error(
 		`Invalid command '${command}'. Expected one of: ${commands.join(', ')}.`
 	);
+	process.exit(1);
 }
 
 function cast(val) {
