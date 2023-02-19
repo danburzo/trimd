@@ -1,6 +1,6 @@
 {
 	"name": "trimd",
-	"version": "0.2.0",
+	"version": "0.3.0",
 	"description": "Trim HTML to Markdown from the command line.",
 	"main": "cli.js",
 	"files": [
