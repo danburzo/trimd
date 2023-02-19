@@ -64,3 +64,10 @@ These are the default HTML options:
 ```js
 const HTML_DEFAULTS = {};
 ```
+
+## See also
+
+-   [Clipboard Inspector](https://github.com/evercoder/clipboard-inspector), a tool to help you explore the kinds of data available when you paste something on a web page, or drop something onto it.
+-   [percollate](https://github.com/danburzo/percollate), a command-line tool to turn web pages into beautiful, readable PDF, EPUB, or HTML docs.
+-   [hred](https://github.com/danburzo/hred), extract data from HTML (and XML) from the command line, using a syntax inspired by CSS selector.
+-   [yamatter](https://github.com/danburzo/yamatter), inspect and transform YAML frontmatter data from the command line.
