@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import opsh from 'opsh';
 import { unified } from 'unified';
 import rehypeParse from 'rehype-parse';
+import rehypeRaw from 'rehype-raw';
 import rehypeRemark from 'rehype-remark';
 import rehypeSanitize from 'rehype-sanitize';
 import rehypeStringify from 'rehype-stringify';
@@ -41,7 +42,8 @@ function getMdToHtmlProcessor(opts) {
 	return unified()
 		.use(remarkParse)
 		.use(remarkGfm)
-		.use(remarkRehype)
+		.use(remarkRehype, { allowDangerousHtml: true })
+		.use(rehypeRaw)
 		.use(rehypeSanitize)
 		.use(rehypeStringify);
 }
