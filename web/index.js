@@ -4,6 +4,11 @@ import rehypeRemark from 'rehype-remark';
 import remarkGfm from 'remark-gfm';
 import remarkStringify from 'remark-stringify';
 
+/* Minimal polyfill for Object.hasOwn() */
+if (!Object.hasOwn) {
+	Object.hasOwn = Object.call.bind(Object.hasOwnProperty);
+}
+
 const processors = new WeakMap();
 
 export async function markdown(html, opts) {
