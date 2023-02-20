@@ -65,6 +65,12 @@ These are the default HTML options:
 const HTML_DEFAULTS = {};
 ```
 
+### `trimd remarkdown`
+
+Convert Markdown to Markdown. The command accepts the same options as `trimd markdown`.
+
+The `trimd remarkdown` command is useful for converting Markdown that may contain raw HTML into the Markdown style specified with the `--md.<option>=<value>` options.
+
 ## See also
 
 -   [Clipboard Inspector](https://github.com/evercoder/clipboard-inspector), a tool to help you explore the kinds of data available when you paste something on a web page, or drop something onto it.

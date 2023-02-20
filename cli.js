@@ -12,6 +12,9 @@ import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import remarkStringify from 'remark-stringify';
 import remarkGfm from 'remark-gfm';
+import { SKIP, visit } from 'unist-util-visit';
+import { fromHtml } from 'hast-util-from-html';
+import { toMdast } from 'hast-util-to-mdast';
 
 async function getPackage() {
 	return JSON.parse(
@@ -29,12 +32,35 @@ async function slurp(stream) {
 	return Buffer.concat(arr, len).toString();
 }
 
+/*
+	Remark plugin to convert mdast 'html' nodes
+	into mdast Markdown nodes.
+*/
+function remarkParseHtml() {
+	return function (tree, file) {
+		visit(tree, 'html', (node, index, parent) => {
+			const mdast = toMdast(fromHtml(node, { fragment: true }), {
+				document: false
+			});
+			parent.children.splice(index, 1, ...mdast.children);
+			return [SKIP, index];
+		});
+	};
+}
+
 function getHtmlToMdProcessor(opts = {}) {
 	return unified()
 		.use(rehypeParse)
-		.use(rehypeSanitize)
 		.use(rehypeRemark)
 		.use(remarkGfm)
+		.use(remarkStringify, opts);
+}
+
+function getMdToMdProcessor(opts = {}) {
+	return unified()
+		.use(remarkParse)
+		.use(remarkGfm)
+		.use(remarkParseHtml)
 		.use(remarkStringify, opts);
 }
 
@@ -48,7 +74,7 @@ function getMdToHtmlProcessor(opts) {
 		.use(rehypeStringify);
 }
 
-const commands = ['markdown', 'markup'];
+const commands = ['markdown', 'markup', 'remarkdown'];
 const args = opsh(process.argv.slice(2), ['h', 'help', 'v', 'version']);
 
 const [command, ...operands] = args.operands;
@@ -112,10 +138,18 @@ if (!operands.length) {
 	operands.push('-');
 }
 
-const processor =
-	command === 'markdown'
-		? getHtmlToMdProcessor(mdOptions)
-		: getMdToHtmlProcessor(htmlOptions);
+let processor;
+switch (command) {
+	case 'markdown':
+		processor = getHtmlToMdProcessor(mdOptions);
+		break;
+	case 'remarkdown':
+		processor = getMdToMdProcessor(mdOptions);
+		break;
+	case 'markup':
+		processor = getMdToHtmlProcessor(htmlOptions);
+		break;
+}
 
 const results = await Promise.all(
 	operands
@@ -138,7 +172,7 @@ async function outputHelp() {
 	console.log(`
 Usage:
   
-    trimd [markup | markdown] [options] [file, ...]
+    trimd [markup | markdown | remarkdown] [options] [file, ...]
 
     Operands are one or more files provided by file path.
     Using '-' (dash) as an operand reads from the standard input ('stdin').
@@ -158,6 +192,9 @@ Commands:
 
     trimd markdown
         Convert HTML to Markdown.
+
+    trimd remarkdown
+        Normalize Markdown.
 
     trimd markup
         Convert Markdown to HMTL.
