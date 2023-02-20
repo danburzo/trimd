@@ -53,7 +53,7 @@ const args = opsh(process.argv.slice(2), ['h', 'help', 'v', 'version']);
 
 const [command, ...operands] = args.operands;
 
-if (!command || args.options.h || args.options.help) {
+if (args.options.h || args.options.help) {
 	await outputHelp();
 	process.exit();
 }
@@ -61,6 +61,11 @@ if (!command || args.options.h || args.options.help) {
 if (args.options.v || args.options.version) {
 	const pkg = await getPackage();
 	console.log(pkg.version);
+	process.exit();
+}
+
+if (!command) {
+	await outputHelp();
 	process.exit();
 }
 
