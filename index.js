@@ -4,6 +4,7 @@ import rehypeRaw from 'rehype-raw';
 import rehypeRemark from 'rehype-remark';
 import rehypeSanitize from 'rehype-sanitize';
 import rehypeStringify from 'rehype-stringify';
+import remarkFrontmatter from 'remark-frontmatter';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import remarkStringify from 'remark-stringify';
@@ -49,6 +50,7 @@ export function getHtmlToMdProcessor(opts = {}) {
 export function getMdToMdProcessor(opts = {}) {
 	return unified()
 		.use(remarkParse)
+		.use(remarkFrontmatter, ['yaml', 'toml'])
 		.use(remarkGfm)
 		.use(remarkParseHtml)
 		.use(remarkStringify, opts);
@@ -57,6 +59,7 @@ export function getMdToMdProcessor(opts = {}) {
 export function getMdToHtmlProcessor(opts) {
 	return unified()
 		.use(remarkParse)
+		.use(remarkFrontmatter, ['yaml', 'toml'])
 		.use(remarkGfm)
 		.use(remarkRehype, { allowDangerousHtml: true })
 		.use(rehypeRaw)

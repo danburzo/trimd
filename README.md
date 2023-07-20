@@ -65,11 +65,15 @@ These are the default HTML options:
 const HTML_DEFAULTS = {};
 ```
 
+This command ignores any YAML/TOML front-matter data present in the source file.
+
 ### `trimd remarkdown`
 
 Convert Markdown to Markdown. The command accepts the same options as `trimd markdown`.
 
 The `trimd remarkdown` command is useful for converting Markdown that may contain raw HTML into the Markdown style specified with the `--md.<option>=<value>` options.
+
+This command preserves any YAML/TOML front-matter data present in the source file.
 
 ## See also
 
