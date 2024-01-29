@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 	<head>
 		<meta charset="utf-8" />
@@ -32,6 +32,7 @@
 
 			a {
 				color: var(--color-accent4);
+				text-underline-offset: 0.15em;
 			}
 
 			pre,
@@ -73,6 +74,13 @@
 				border: none;
 				background: var(--color-accent2);
 				color: white;
+			}
+
+			button.secondary {
+				background: transparent;
+				color: var(--color-accent4);
+				text-decoration: underline;
+				text-underline-offset: 0.15em;
 			}
 
 			textarea {
@@ -159,6 +167,9 @@
 				<textarea id="md_output" autocomplete="off"></textarea>
 				<button type="button" id="copy_button" disabled>
 					Copy to clipboard
+				</button>
+				<button type="button" class="secondary" id="put_html_back">
+					Put back as HTML
 				</button>
 			</div>
 		</div>
@@ -292,18 +303,24 @@
 		<h2>About trimd</h2>
 
 		<p>
-			Trimd is an online tool for converting HTML to Markdown. A companion
-			command-line tool is
-			<a href="https://github.com/danburzo/trimd">available on GitHub</a>.
+			Trimd is an online tool for converting HTML to Markdown. The
+			conversion is performed in-memory (no data leaves your browser).
 		</p>
 
 		<p>
 			Made by <a href="https://danburzo.ro/">Dan Cătălin Burzo</a>.
-			Powered by <a href="https://unifiedjs.com/">unified.js</a>.
+			Powered by <a href="https://unifiedjs.com/">unified.js</a>. A
+			companion command-line tool is
+			<a href="https://github.com/danburzo/trimd">available on GitHub</a>.
 		</p>
 
 		<script type="module">
-			import { markdown, formDataMap, debounce } from './build/index.js';
+			import {
+				markdown,
+				markup,
+				formDataMap,
+				debounce
+			} from './build/index.js';
 
 			const input = document.getElementById('html_input');
 			const output = document.getElementById('md_output');
@@ -312,6 +329,7 @@
 
 			const pasteButton = document.getElementById('paste_button');
 			const copyButton = document.getElementById('copy_button');
+			const putHtmlBackButton = document.getElementById('put_html_back');
 
 			if (navigator.clipboard) {
 				if (navigator.clipboard.writeText) {
@@ -350,6 +368,10 @@
 					});
 				}
 			}
+
+			putHtmlBackButton.addEventListener('click', async e => {
+				input.value = await markup(output.value);
+			});
 
 			input.addEventListener('dragover', e => {
 				e.preventDefault();

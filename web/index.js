@@ -3,6 +3,11 @@ import rehypeDomParse from 'rehype-dom-parse';
 import rehypeRemark from 'rehype-remark';
 import remarkGfm from 'remark-gfm';
 import remarkStringify from 'remark-stringify';
+import remarkParse from 'remark-parse';
+import remarkRehype from 'remark-rehype';
+import rehypeRaw from 'rehype-raw';
+import rehypeSanitize from 'rehype-sanitize';
+import rehypeStringify from 'rehype-stringify';
 
 /* Minimal polyfill for Object.hasOwn() */
 if (!Object.hasOwn) {
@@ -11,6 +16,10 @@ if (!Object.hasOwn) {
 
 const processors = new WeakMap();
 
+/* 
+	TODO: why are we using WeakMap here? 
+	The `opts` object seems to be new every time. 
+*/
 export async function markdown(html, opts) {
 	let toMarkdown = processors.get(opts);
 	if (!toMarkdown) {
@@ -22,6 +31,21 @@ export async function markdown(html, opts) {
 		processors.set(opts, toMarkdown);
 	}
 	return toMarkdown.process(html).then(res => String(res));
+}
+
+/* 
+	We haven’t used the WeakMap approach here, 
+	until we sort out what the idea was there.
+*/
+export async function markup(md, opts) {
+	let toHtml = unified()
+		.use(remarkParse)
+		.use(remarkGfm)
+		.use(remarkRehype, { allowDangerousHtml: true })
+		.use(rehypeRaw)
+		.use(rehypeSanitize)
+		.use(rehypeStringify);
+	return toHtml.process(md).then(res => String(res));
 }
 
 /*
