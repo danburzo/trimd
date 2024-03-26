@@ -12,7 +12,7 @@
 	},
 	"scripts": {
 		"prepare": "git config core.hooksPath .git-hooks",
-		"test": "npx tape 'test/**/*.test.js'",
+		"test": "node --test 'test/**/*.test.js'",
 		"start:web": "npx esbuild --servedir=web --watch --outdir=web/build --metafile=web/build/meta.json --bundle --format=esm --target=es6 web/index.js",
 		"build:web": "npx esbuild --outdir=web/build --metafile=web/build/meta.json --bundle --minify --format=esm --target=es6 web/index.js"
 	},
