@@ -75,6 +75,22 @@ The `trimd remarkdown` command is useful for converting Markdown that may contai
 
 This command preserves any YAML/TOML front-matter data present in the source file.
 
+### `trimd demarkdown`
+
+Convert Markdown to plain text.
+
+This command ignores any YAML/TOML front-matter data present in the source file.
+
+### `trimd demarkup`
+
+Convert HTML to plain text, using an algorithm similar to [`HTMLElement.innerText`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/innerText).
+
+You can also convert HTML to plain text via Markdown by piping the `markdown` and `demarkdown` commands:
+
+```bash
+trimd markdown my-file.html | trimd demarkdown
+```
+
 ## See also
 
 -   [Clipboard Inspector](https://github.com/evercoder/clipboard-inspector), a tool to help you explore the kinds of data available when you paste something on a web page, or drop something onto it.
