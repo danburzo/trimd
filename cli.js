@@ -6,7 +6,9 @@ import {
 	slurp,
 	getHtmlToMdProcessor,
 	getMdToMdProcessor,
-	getMdToHtmlProcessor
+	getMdToHtmlProcessor,
+	getMdToTextProcessor,
+	getHtmlToTextProcessor
 } from './index.js';
 
 async function getPackage() {
@@ -15,7 +17,7 @@ async function getPackage() {
 	);
 }
 
-const commands = ['markdown', 'markup', 'remarkdown'];
+const commands = ['markdown', 'markup', 'remarkdown', 'demarkdown', 'demarkup'];
 const args = opsh(process.argv.slice(2), ['h', 'help', 'v', 'version']);
 
 const [command, ...operands] = args.operands;
@@ -90,6 +92,11 @@ switch (command) {
 	case 'markup':
 		processor = getMdToHtmlProcessor(htmlOptions);
 		break;
+	case 'demarkdown':
+		processor = getMdToTextProcessor();
+		break;
+	case 'demarkup':
+		processor = getHtmlToTextProcessor();
 }
 
 const results = await Promise.all(
@@ -113,7 +120,7 @@ async function outputHelp() {
 	console.log(`
 Usage:
   
-    trimd [markup | markdown | remarkdown] [options] [file, ...]
+    trimd [command] [options] [file, ...]
 
     Operands are one or more files provided by file path.
     Using '-' (dash) as an operand reads from the standard input ('stdin').
@@ -131,14 +138,20 @@ General options:
 
 Commands:
 
-    trimd markdown
+    markdown
         Convert HTML to Markdown.
 
-    trimd remarkdown
+    remarkdown
         Normalize Markdown.
 
-    trimd markup
+    markup
         Convert Markdown to HMTL.
+
+    demarkdown
+        Convert Markdown to plain text.
+
+    demarkup
+        Convert HTML to plain text.
 
 Markdown-specific options:
 
