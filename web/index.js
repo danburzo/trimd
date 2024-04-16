@@ -8,10 +8,42 @@ import remarkRehype from 'remark-rehype';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
 import rehypeStringify from 'rehype-stringify';
+import stripMarkdown from 'strip-markdown';
+import { SKIP, visit } from 'unist-util-visit';
 
 /* Minimal polyfill for Object.hasOwn() */
 if (!Object.hasOwn) {
 	Object.hasOwn = Object.call.bind(Object.hasOwnProperty);
+}
+
+/* See notes in the CLI tool’s index.js */
+function remarkToText() {
+	this.compiler = function visit(node) {
+		if (!node) return '';
+		if (Array.isArray(node)) return node.map(visit).join('');
+		if (node.value) return node.value;
+		if (node.children) {
+			return node.children
+				.map(visit)
+				.join(node.type === 'root' ? '\n\n' : '');
+		}
+	};
+}
+
+/*
+	Remark plugin to convert mdast 'html' nodes
+	into mdast Markdown nodes.
+*/
+function remarkParseHtml() {
+	return function (tree, file) {
+		visit(tree, 'html', (node, index, parent) => {
+			const mdast = toMdast(fromHtml(node, { fragment: true }), {
+				document: false
+			});
+			parent.children.splice(index, 1, ...mdast.children);
+			return [SKIP, index];
+		});
+	};
 }
 
 const processors = new WeakMap();
@@ -31,6 +63,16 @@ export async function markdown(html, opts) {
 		processors.set(opts, toMarkdown);
 	}
 	return toMarkdown.process(html).then(res => String(res));
+}
+
+export async function demarkdown(md) {
+	let toPlainText = unified()
+		.use(remarkParse)
+		.use(remarkGfm)
+		.use(remarkParseHtml)
+		.use(stripMarkdown)
+		.use(remarkToText);
+	return toPlainText.process(md).then(res => String(res));
 }
 
 /* 

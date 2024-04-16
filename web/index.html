@@ -50,12 +50,14 @@
 				padding: 1rem;
 				tab-size: 2;
 				scrollbar-gutter: stable;
+				line-height: 1.5;
 			}
 
 			.columns {
 				display: grid;
 				grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
 				gap: 1rem;
+				margin-bottom: 1rem;
 			}
 
 			input,
@@ -69,24 +71,27 @@
 
 			button {
 				appearance: none;
-				padding: 0.5rem 1.5rem;
-				/*				border: 2px solid var(--color-fg);*/
+				padding: 0.5rem 1.25rem;
 				border: none;
 				background: var(--color-accent2);
 				color: white;
 			}
+			button:not(:disabled) {
+				/*				font-weight: bold;*/
+				cursor: pointer;
+			}
 
 			button.secondary {
-				background: transparent;
-				color: var(--color-accent4);
-				text-decoration: underline;
+				background: var(--color-bg-darker);
+				color: var(--color-accent2);
 				text-underline-offset: 0.15em;
+				font-weight: normal;
 			}
 
 			textarea {
 				font-family: var(--font-mono);
 				appearance: none;
-				border: 2px solid var(--color-fg);
+				border: 1px solid var(--color-fg);
 				padding: 0.5rem;
 				margin: 0.5rem 0;
 				width: 100%;
@@ -101,18 +106,18 @@
 
 			details {
 				padding: 0.5rem;
-				margin: 1rem 0;
 				background: var(--color-bg-darker);
 			}
 
 			summary {
-				font-weight: bold;
+				font-weight: normal;
 				cursor: pointer;
 			}
 
 			h1,
 			h2 {
 				font-size: 1em;
+				margin: 0;
 			}
 
 			fieldset {
@@ -134,10 +139,33 @@
 			:disabled {
 				background: var(--color-bg-darker);
 				color: inherit;
-			}
-			:disabled:after {
-				content: ' (not available)';
+				cursor: not-allowed;
 				font-style: italic;
+			}
+
+			.btn-group {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.5rem;
+				align-items: center;
+			}
+
+			header {
+				margin-bottom: 1rem;
+			}
+
+			footer {
+				margin-top: 2rem;
+			}
+
+			label .note {
+				font-weight: normal;
+			}
+
+			@media (max-width: 30em) {
+				button {
+					padding: 0.5rem 0.75rem;
+				}
 			}
 		</style>
 	</head>
@@ -152,25 +180,37 @@
 		<div class="columns">
 			<div>
 				<h2>
-					<label for="html_input">HTML input:</label>
+					<label for="html_input">HTML goes in</label>
 				</h2>
 				<textarea id="html_input" autocomplete="off"></textarea>
-				<button type="button" id="paste_button" disabled>Paste</button>
+				<div class="btn-group">
+					<button type="button" id="paste_button" disabled>
+						Paste
+					</button>
+				</div>
 			</div>
 			<div>
 				<h2>
 					<label for="md_output">
-						<span class="visually-hidden">(Read-only)</span>
-						Markdown output:
+						Markdown comes out <span class="note">(read-only)</span>
 					</label>
 				</h2>
 				<textarea id="md_output" autocomplete="off"></textarea>
-				<button type="button" id="copy_button" disabled>
-					Copy to clipboard
-				</button>
-				<button type="button" class="secondary" id="put_html_back">
-					Put back as HTML
-				</button>
+				<div class="btn-group">
+					<button type="button" id="copy_button" disabled>
+						Copy to clipboard
+					</button>
+					<button type="button" class="secondary" id="put_html_back">
+						Put back as HTML
+					</button>
+					<button
+						type="button"
+						class="secondary"
+						id="remove_formatting"
+					>
+						Remove formatting
+					</button>
+				</div>
 			</div>
 		</div>
 
@@ -300,24 +340,20 @@
 			</div>
 		</div>
 
-		<h2>About trimd</h2>
-
-		<p>
-			Trimd is an online tool for converting HTML to Markdown. The
-			conversion is performed in-memory (no data leaves your browser).
-		</p>
-
-		<p>
-			Made by <a href="https://danburzo.ro/">Dan Cătălin Burzo</a>.
-			Powered by <a href="https://unifiedjs.com/">unified.js</a>. A
-			companion command-line tool is
-			<a href="https://github.com/danburzo/trimd">available on GitHub</a>.
-		</p>
+		<footer>
+			<p>
+				<b>Trimd</b> is an online tool for converting HTML to Markdown.
+				All operations are performed locally, no data ever leaves your
+				browser.
+				<a href="https://danburzo.ro/projects/trimd/">More info</a>.
+			</p>
+		</footer>
 
 		<script type="module">
 			import {
 				markdown,
 				markup,
+				demarkdown,
 				formDataMap,
 				debounce
 			} from './build/index.js';
@@ -330,6 +366,8 @@
 			const pasteButton = document.getElementById('paste_button');
 			const copyButton = document.getElementById('copy_button');
 			const putHtmlBackButton = document.getElementById('put_html_back');
+			const removeFormattingButton =
+				document.getElementById('remove_formatting');
 
 			if (navigator.clipboard) {
 				if (navigator.clipboard.writeText) {
@@ -371,6 +409,10 @@
 
 			putHtmlBackButton.addEventListener('click', async e => {
 				input.value = await markup(output.value);
+			});
+
+			removeFormattingButton.addEventListener('click', async e => {
+				output.value = await demarkdown(output.value);
 			});
 
 			input.addEventListener('dragover', e => {
