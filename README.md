@@ -1,6 +1,6 @@
 # trimd
 
-Convert between HTML and Markdown from the command line, powered by [unified.js](https://unifiedjs.com).
+Convert between HTML, Markdown, and plain text from the command line.
 
 An online companion tool is available at [**danburzo.ro/trimd**](https://danburzo.ro/trimd/).
 
@@ -20,10 +20,18 @@ npx trimd markdown my-file.html
 
 ## Usage
 
-### General options
+```bash
+trimd [command] [options] [file1, [file2, …]]
+```
+
+Trimd accepts one or more input files, or uses the standard input (`stdin`) when no files are provided. You can also concatenate `stdin` in addition to other input files using the `-` operator.
+
+A couple of general options are available:
 
 -   **`-h, --help`** - output help information
 -   **`-v, --version`** - output program version
+
+Below is a list of supported commands.
 
 ### `trimd markdown`
 
@@ -71,6 +79,10 @@ This command ignores any YAML/TOML front-matter data present in the source file.
 
 Convert Markdown to Markdown. The command accepts the same options as `trimd markdown`.
 
+```bash
+trimd remarkdown my-file.md
+```
+
 The `trimd remarkdown` command is useful for converting Markdown that may contain raw HTML into the Markdown style specified with the `--md.<option>=<value>` options.
 
 This command preserves any YAML/TOML front-matter data present in the source file.
@@ -79,17 +91,31 @@ This command preserves any YAML/TOML front-matter data present in the source fil
 
 Convert Markdown to plain text.
 
+```bash
+trimd demarkdown my-file.md
+```
+
 This command ignores any YAML/TOML front-matter data present in the source file.
 
 ### `trimd demarkup`
 
-Convert HTML to plain text, using an algorithm similar to [`HTMLElement.innerText`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/innerText).
+Convert HTML to plain text.
 
-You can also convert HTML to plain text via Markdown by piping the `markdown` and `demarkdown` commands:
+```bash
+trimd demarkup my-file.html
+```
+
+Plain text is produced according to the algorithm for [`HTMLElement.innerText`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/innerText).
+
+You can also convert HTML to plain text via Markdown by piping `markdown` and `demarkdown` commands:
 
 ```bash
 trimd markdown my-file.html | trimd demarkdown
 ```
+
+## Acknowledgements
+
+Trimd is a command-line interface on top of a chain of [unified.js](https://unifiedjs.com) libraries.
 
 ## See also
 
