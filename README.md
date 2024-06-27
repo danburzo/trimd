@@ -75,6 +75,8 @@ Use the `--data-url` flag to output the HTML as a base64-encoded `data:` URL. Th
 trimd markup --data-url my-file.md | xargs open -a Firefox
 ```
 
+> Note that at the time of writing, Firefox does not immediately render `data:` URLs passed from the command line (you need to press <kbd>Return</kbd> in the URL bar). See [#1892289](https://bugzilla.mozilla.org/show_bug.cgi?id=1892289), which is in the process of being fixed.
+
 ### `trimd remarkup`
 
 Simplify HTML by converting it to Markdown and back. The command is more or less the equivalent of `trimd markdown | trimd markup`.
