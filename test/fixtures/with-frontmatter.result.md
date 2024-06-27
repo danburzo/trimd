@@ -8,4 +8,4 @@ keywords:
 
 This file contains both HTML, including things like **bold** [and a link](https://joinmastodon.org)
 
-> It also contains _markdown_, most notably [links](https://joinmastodon.org) in .md format
+> It also contains *markdown*, most notably [links](https://joinmastodon.org) in .md format

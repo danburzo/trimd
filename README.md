@@ -67,13 +67,19 @@ Convert Markdown to HTML.
 trimd markup my-file.md
 ```
 
-These are the default HTML options:
+This command ignores any YAML/TOML front-matter data present in the source file.
 
-```js
-const HTML_DEFAULTS = {};
+Use the `--data-url` flag to output the HTML as a base64-encoded `data:` URL. This format can be useful for viewing the HTML content in a browser:
+
+```bash
+trimd markup --data-url my-file.md | xargs open -a Firefox
 ```
 
-This command ignores any YAML/TOML front-matter data present in the source file.
+### `trimd remarkup`
+
+Simplify HTML by converting it to Markdown and back. The command is more or less the equivalent of `trimd markdown | trimd markup`.
+
+Use the `--data-url` flag to output the HTML as a base64-encoded `data:` URL.
 
 ### `trimd remarkdown`
 

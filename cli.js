@@ -4,11 +4,13 @@ import { readFile } from 'node:fs/promises';
 import opsh from 'opsh';
 import {
 	slurp,
+	toDataUrl,
 	getHtmlToMdProcessor,
 	getMdToMdProcessor,
 	getMdToHtmlProcessor,
 	getMdToTextProcessor,
-	getHtmlToTextProcessor
+	getHtmlToTextProcessor,
+	getHtmlToHtmlProcessor
 } from './index.js';
 
 async function getPackage() {
@@ -17,8 +19,21 @@ async function getPackage() {
 	);
 }
 
-const commands = ['markdown', 'markup', 'remarkdown', 'demarkdown', 'demarkup'];
-const args = opsh(process.argv.slice(2), ['h', 'help', 'v', 'version']);
+const commands = [
+	'markdown',
+	'markup',
+	'remarkdown',
+	'demarkdown',
+	'remarkup',
+	'demarkup'
+];
+const args = opsh(process.argv.slice(2), [
+	'h',
+	'help',
+	'v',
+	'version',
+	'data-url'
+]);
 
 const [command, ...operands] = args.operands;
 
@@ -82,6 +97,7 @@ if (!operands.length) {
 }
 
 let processor;
+let postProcessor = v => v;
 switch (command) {
 	case 'markdown':
 		processor = getHtmlToMdProcessor(mdOptions);
@@ -91,12 +107,22 @@ switch (command) {
 		break;
 	case 'markup':
 		processor = getMdToHtmlProcessor(htmlOptions);
+		if (args.options['data-url']) {
+			postProcessor = toDataUrl;
+		}
 		break;
 	case 'demarkdown':
 		processor = getMdToTextProcessor();
 		break;
 	case 'demarkup':
 		processor = getHtmlToTextProcessor();
+		break;
+	case 'remarkup':
+		processor = getHtmlToHtmlProcessor();
+		if (args.options['data-url']) {
+			postProcessor = toDataUrl;
+		}
+		break;
 }
 
 const results = await Promise.all(
@@ -105,7 +131,7 @@ const results = await Promise.all(
 		.map(promise =>
 			promise
 				.then(content => processor.process(content))
-				.then(result => String(result))
+				.then(result => postProcessor(String(result)))
 		)
 );
 
@@ -153,10 +179,19 @@ Commands:
     demarkup
         Convert HTML to plain text.
 
+    remarkup
+        Simplify HTML by converting it to Markdown and back.
+
 Markdown-specific options:
 
     --md.<option>=<value>
         Markdown options forwarded to 'remark-stringify'.
+
+HTML-specific options:
+
+    --data-url
+        Output the resulting HTML as a base64-encoded 'data:' URL.
+        Applies to the 'markup' and 'remarkup' commands.
 
 Examples:
 
