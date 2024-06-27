@@ -88,6 +88,10 @@ export async function slurp(stream) {
 	return Buffer.concat(arr, len).toString();
 }
 
+export function toDataUrl(str) {
+	return `data:text/html;charset=utf-8;base64,${Buffer.from(str).toString('base64')}`;
+}
+
 /*
 	Remark plugin to convert mdast 'html' nodes
 	into mdast Markdown nodes.
@@ -167,6 +171,20 @@ export function getMdToHtmlProcessor(opts) {
 		.use(rehypeRaw)
 		.use(rehypeSanitize)
 		.use(rehypeStringify);
+}
+
+export function getHtmlToHtmlProcessor() {
+	return (
+		unified()
+			.use(rehypeParse)
+			.use(rehypeRemark)
+			// Not enabled yet, as it doesn’t treat some corner cases
+			// See: https://github.com/danburzo/trimd/issues/5
+			// .use(remarkTrailingWhitespace)
+			.use(remarkRehype)
+			.use(rehypeSanitize)
+			.use(rehypeStringify)
+	);
 }
 
 export function getMdToTextProcessor() {
