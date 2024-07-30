@@ -85,7 +85,7 @@ Simplify HTML by converting it to Markdown and back. The command is more or less
 
 Use the `--data-url` flag to output the HTML as a base64-encoded `data:` URL.
 
-Use the `--no-sanitize` flag to skip the HTML sanitization step. Sanitization should only be disabled when the Markdown input is known to be safe.
+Use the `--no-sanitize` flag to skip the HTML sanitization step. Sanitization should only be disabled when the HTML input is known to be safe.
 
 ### `trimd remarkdown`
 
