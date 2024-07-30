@@ -87,14 +87,15 @@ const MD_DEFAULTS = {
 	rule: '-'
 };
 
-const HTML_DEFAULTS = {};
-
 const mdOptions = { ...MD_DEFAULTS, ...namespacedOptions('md') };
-const htmlOptions = { ...HTML_DEFAULTS };
 
 if (!operands.length) {
 	operands.push('-');
 }
+
+const htmlOptions = {
+	sanitize: !args.options['no-sanitize']
+};
 
 let processor;
 let postProcessor = v => v;
@@ -118,7 +119,7 @@ switch (command) {
 		processor = getHtmlToTextProcessor();
 		break;
 	case 'remarkup':
-		processor = getHtmlToHtmlProcessor();
+		processor = getHtmlToHtmlProcessor(htmlOptions);
 		if (args.options['data-url']) {
 			postProcessor = toDataUrl;
 		}
@@ -192,6 +193,10 @@ HTML-specific options:
     --data-url
         Output the resulting HTML as a base64-encoded 'data:' URL.
         Applies to the 'markup' and 'remarkup' commands.
+
+    --no-sanitize
+       Skip the HTML sanitization step. 
+       Should only be used when the input is known to be safe.
 
 Examples:
 

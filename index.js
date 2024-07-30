@@ -92,6 +92,10 @@ export function toDataUrl(str) {
 	return `data:text/html;charset=utf-8;base64,${Buffer.from(str).toString('base64')}`;
 }
 
+function rehypeNoOp() {
+	return () => {};
+}
+
 /*
 	Remark plugin to convert mdast 'html' nodes
 	into mdast Markdown nodes.
@@ -162,18 +166,18 @@ export function getMdToMdProcessor(opts = {}) {
 		.use(remarkStringify, opts);
 }
 
-export function getMdToHtmlProcessor(opts) {
+export function getMdToHtmlProcessor(opts = {}) {
 	return unified()
 		.use(remarkParse)
 		.use(remarkFrontmatter, ['yaml', 'toml'])
 		.use(remarkGfm)
 		.use(remarkRehype, { allowDangerousHtml: true })
 		.use(rehypeRaw)
-		.use(rehypeSanitize)
+		.use(opts.sanitize ? rehypeSanitize : rehypeNoOp)
 		.use(rehypeStringify);
 }
 
-export function getHtmlToHtmlProcessor() {
+export function getHtmlToHtmlProcessor(opts = {}) {
 	return (
 		unified()
 			.use(rehypeParse)
@@ -182,7 +186,7 @@ export function getHtmlToHtmlProcessor() {
 			// See: https://github.com/danburzo/trimd/issues/5
 			// .use(remarkTrailingWhitespace)
 			.use(remarkRehype)
-			.use(rehypeSanitize)
+			.use(opts.sanitize ? rehypeSanitize : rehypeNoOp)
 			.use(rehypeStringify)
 	);
 }
