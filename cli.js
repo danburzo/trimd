@@ -34,7 +34,8 @@ const args = opsh(process.argv.slice(2), [
 	'v',
 	'version',
 	'data-url',
-	'write'
+	'write',
+	'silent'
 ]);
 
 const [command, ...operands] = args.operands;
@@ -146,12 +147,14 @@ const results = await Promise.all(
 if (args.options.write) {
 	operands.forEach((operand, idx) => {
 		if (operand === '-') {
-			console.warn('Using --write, `stdin` skipped.');
+			if (!args.options.silent) {
+				console.warn('Using --write, `stdin` skipped.');
+			}
 			return;
 		}
 		writeFile(operand, results[idx]);
 	});
-} else {
+} else if (!args.options.silent) {
 	console.log(results.join('\n'));
 }
 
@@ -184,6 +187,9 @@ General options:
     	Write results to the original files instead of
     	outputting to 'stdout'. When using --write,
     	the result of processing 'stdin' is ignored.
+
+    --silent
+    	Suppress the output of commands.
 
 Commands:
 

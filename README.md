@@ -28,8 +28,9 @@ Trimd accepts one or more input files, or uses the standard input (`stdin`) when
 
 A couple of general options are available:
 
--   **`-h, --help`** - output help information
--   **`-v, --version`** - output program version
+-   **`-h, --help`** - output help information.
+-   **`-v, --version`** - output program version.
+-   **`--silent`** - suppress the output of commands.
 
 By default, the results of processing the operands are concatenated to `stdout`. Use the `--write` option to write the results back to their respective original files.
 
