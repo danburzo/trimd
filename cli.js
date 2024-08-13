@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
 import opsh from 'opsh';
 import {
 	slurp,
@@ -97,6 +98,11 @@ const htmlOptions = {
 	sanitize: !args.options['no-sanitize']
 };
 
+const transformer = args.options.transform || args.options.t;
+const transformFn = transformer
+	? (await import(resolve(transformer))).default
+	: undefined;
+
 let processor;
 let postProcessor = v => v;
 switch (command) {
@@ -104,7 +110,7 @@ switch (command) {
 		processor = getHtmlToMdProcessor(mdOptions);
 		break;
 	case 'remarkdown':
-		processor = getMdToMdProcessor(mdOptions);
+		processor = getMdToMdProcessor(mdOptions, transformFn);
 		break;
 	case 'markup':
 		processor = getMdToHtmlProcessor(htmlOptions);
@@ -187,6 +193,12 @@ Markdown-specific options:
 
     --md.<option>=<value>
         Markdown options forwarded to 'remark-stringify'.
+
+    -t <transform>, 
+    --transform=<transform>
+        Path to a JavaScript file containing a function 
+        to transform the Markdown, operating on an MDAST tree. 
+        Applies to 'remarkdown'.
 
 HTML-specific options:
 

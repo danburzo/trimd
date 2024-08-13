@@ -25,3 +25,17 @@ test('remarkdown', async t => {
 		})
 	);
 });
+
+test('with transform', async t => {
+	const processor = getMdToMdProcessor({}, visit => {
+		return (tree, file) => {
+			visit(tree, 'text', (node, index, parent) => {
+				node.value += '!';
+			});
+		};
+	});
+	assert.equal(
+		await processor.process('Hello').then(r => String(r)),
+		'Hello!\n'
+	);
+});

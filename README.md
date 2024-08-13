@@ -99,6 +99,28 @@ The `trimd remarkdown` command is useful for converting Markdown that may contai
 
 This command preserves any YAML/TOML front-matter data present in the source file.
 
+You can transform the Markdown output by providing a transform function specified in an external JavaScript file and passed via the `-t <transform>` or `--transform=<transform>` option.
+
+```bash
+trimd remarkdown --transform=exclamation.js my-input.md
+```
+
+```js
+// File: exclamation.js
+
+export default function exclamation(visit) {
+	return function transform(tree, file) {
+		visit(tree, 'text', function (node, index, parent) {
+			node.value += '!';
+		});
+	};
+}
+```
+
+The default export of your transformer will receive a reference to the `visit` function from the [`unist-util-visit`](https://github.com/syntax-tree/unist-util-visit) package. This is provided as a convenience, you can use it or write your own processing logic.
+
+This export must return a function that transforms the [<abbr>MDAST</abbr> tree](https://github.com/syntax-tree/mdast) passed as the first argument. See [`unified.use(Plugin)`](https://github.com/unifiedjs/unified?tab=readme-ov-file#plugin) for more details.
+
 ### `trimd demarkdown`
 
 Convert Markdown to plain text.
