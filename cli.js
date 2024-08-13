@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import opsh from 'opsh';
 import {
@@ -33,7 +33,8 @@ const args = opsh(process.argv.slice(2), [
 	'help',
 	'v',
 	'version',
-	'data-url'
+	'data-url',
+	'write'
 ]);
 
 const [command, ...operands] = args.operands;
@@ -142,7 +143,17 @@ const results = await Promise.all(
 		)
 );
 
-console.log(results.join('\n'));
+if (args.options.write) {
+	operands.forEach((operand, idx) => {
+		if (operand === '-') {
+			console.warn('Using --write, `stdin` skipped.');
+			return;
+		}
+		writeFile(operand, results[idx]);
+	});
+} else {
+	console.log(results.join('\n'));
+}
 
 async function outputHelp() {
 	const pkg = await getPackage();
@@ -168,6 +179,11 @@ General options:
 
     -v, --version
         Output program version.
+
+    --write
+    	Write results to the original files instead of
+    	outputting to 'stdout'. When using --write,
+    	the result of processing 'stdin' is ignored.
 
 Commands:
 

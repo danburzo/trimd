@@ -31,6 +31,8 @@ A couple of general options are available:
 -   **`-h, --help`** - output help information
 -   **`-v, --version`** - output program version
 
+By default, the results of processing the operands are concatenated to `stdout`. Use the `--write` option to write the results back to their respective original files.
+
 Below is a list of supported commands.
 
 ### `trimd markdown`
