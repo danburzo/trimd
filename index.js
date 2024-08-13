@@ -14,6 +14,11 @@ import stripMarkdown from 'strip-markdown';
 import { SKIP, visit } from 'unist-util-visit';
 import { fromHtml } from 'hast-util-from-html';
 import { toMdast } from 'hast-util-to-mdast';
+
+function noop() {
+	return () => {};
+}
+
 /*
 	Remark plugin to fix trailing whitespace in inline nodes.
 	See: https://github.com/orgs/syntax-tree/discussions/60
@@ -92,10 +97,6 @@ export function toDataUrl(str) {
 	return `data:text/html;charset=utf-8;base64,${Buffer.from(str).toString('base64')}`;
 }
 
-function rehypeNoOp() {
-	return () => {};
-}
-
 /*
 	Remark plugin to convert mdast 'html' nodes
 	into mdast Markdown nodes.
@@ -157,12 +158,13 @@ export function getHtmlToMdProcessor(opts = {}) {
 	);
 }
 
-export function getMdToMdProcessor(opts = {}) {
+export function getMdToMdProcessor(opts = {}, transformFn) {
 	return unified()
 		.use(remarkParse)
 		.use(remarkFrontmatter, ['yaml', 'toml'])
 		.use(remarkGfm)
 		.use(remarkParseHtml)
+		.use(transformFn ? () => transformFn(visit) : noop)
 		.use(remarkStringify, opts);
 }
 
@@ -173,7 +175,7 @@ export function getMdToHtmlProcessor(opts = {}) {
 		.use(remarkGfm)
 		.use(remarkRehype, { allowDangerousHtml: true })
 		.use(rehypeRaw)
-		.use(opts.sanitize ? rehypeSanitize : rehypeNoOp)
+		.use(opts.sanitize ? rehypeSanitize : noop)
 		.use(rehypeStringify);
 }
 
@@ -186,7 +188,7 @@ export function getHtmlToHtmlProcessor(opts = {}) {
 			// See: https://github.com/danburzo/trimd/issues/5
 			// .use(remarkTrailingWhitespace)
 			.use(remarkRehype)
-			.use(opts.sanitize ? rehypeSanitize : rehypeNoOp)
+			.use(opts.sanitize ? rehypeSanitize : noop)
 			.use(rehypeStringify)
 	);
 }

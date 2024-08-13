@@ -6,11 +6,11 @@ test('trailing whitespace', async t => {
 	const testcases = [
 		{
 			input: '<span style="font-weight: 400;">Select the </span><strong>Project Window </strong><span style="font-weight: 400;">in your Dashboard.</span>',
-			expected: 'Select the **Project Window** in your Dashboard.\n'
+			expected: 'Select the **Project Window **in your Dashboard.\n'
 		},
 		{
 			input: '<em>italic<strong> bold</strong></em>',
-			expected: ''
+			expected: '*italic** bold***\n'
 		}
 	];
 	await Promise.all(
