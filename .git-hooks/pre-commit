@@ -1,2 +1,0 @@
-#!/bin/sh
-npx pretty-quick --staged
